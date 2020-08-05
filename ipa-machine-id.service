@@ -1,0 +1,17 @@
+[Unit]
+Description=Create /data/etc/machine-id for IPA
+Conflicts=shutdown.target
+Before=dbus-broker.service systemd-journald.service systemd-machine-id-commit.service shutdown.target
+After=local-fs.target
+# Create machine-id in /data when /etc/machine-id is a symbolic link
+ConditionPathExists=!/data/etc/machine-id
+ConditionPathIsSymbolicLink=/etc/machine-id
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/dbus-uuidgen --ensure=/data/etc/machine-id
+ExecStartPost=/usr/bin/chmod 444 /data/etc/machine-id
+ExecStartPost=-/usr/bin/chcon -u system_u -r object_r -t machineid_t /data/etc/machine-id
+
+[Install]
+WantedBy=container-ipa.target
