@@ -1,8 +1,10 @@
 [Unit]
 Description=Create /data/etc/machine-id for IPA
 Conflicts=shutdown.target
-Before=dbus-broker.service systemd-journald.service systemd-machine-id-commit.service shutdown.target
-After=local-fs.target
+# run this service early and before D-Bus and journald
+# (based on systemd-firstboot.service)
+Before=dbus-broker.service systemd-journald.service sysinit.target shutdown.target
+After=systemd-remount-fs.service
 # Create machine-id in /data when /etc/machine-id is a symbolic link
 ConditionPathExists=!/data/etc/machine-id
 ConditionPathIsSymbolicLink=/etc/machine-id
